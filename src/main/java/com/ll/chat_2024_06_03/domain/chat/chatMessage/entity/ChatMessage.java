@@ -1,5 +1,6 @@
-package com.ll.chat_2024_06_03.domain.chat.chatRoom.entity;
+package com.ll.chat_2024_06_03.domain.chat.chatMessage.entity;
 
+import com.ll.chat_2024_06_03.domain.chat.chatRoom.entity.ChatRoom;
 import com.ll.chat_2024_06_03.global.jpa.BaseEntity.BaseEntity;
 import jakarta.persistence.Entity;
 import jakarta.persistence.ManyToOne;
@@ -25,4 +26,7 @@ public class ChatMessage extends BaseEntity {
 
     @Getter
     private String content;
+
+
+
 }
