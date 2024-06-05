@@ -4,6 +4,7 @@ import com.ll.chat_2024_06_03.global.jpa.BaseEntity.BaseEntity;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OrderBy;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
@@ -19,6 +20,7 @@ import static lombok.AccessLevel.PROTECTED;
 @Getter
 @Setter
 @ToString(callSuper = true)
+
 public class ChatRoom extends BaseEntity {
     @Getter
     private String name;
@@ -27,6 +29,7 @@ public class ChatRoom extends BaseEntity {
     @Builder.Default
     @Getter
     @ToString.Exclude
+    @OrderBy("id DESC")
     private List<ChatMessage> chatMessages = new ArrayList<>();
 
     public ChatRoom(String name) {
