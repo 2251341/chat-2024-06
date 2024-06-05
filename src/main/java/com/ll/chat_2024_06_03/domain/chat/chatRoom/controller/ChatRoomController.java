@@ -9,6 +9,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -21,6 +22,7 @@ import java.util.List;
 public class ChatRoomController {
     private final ChatRoomService chatRoomService;
     private final ChatMessageService chatMessageService;
+    private final SimpMessagingTemplate messagingTemplate;
 
     @GetMapping("/{roomId}")
     public String showRoom(
@@ -63,34 +65,24 @@ public class ChatRoomController {
 
     @Getter
     @AllArgsConstructor
-    public static class WriterResponseBody {
-        private Long chatMessageId;
+    public static class WriteResponseBody {
+        private ChatMessage chatMessage;
     }
 
     @PostMapping("/{roomId}/write")
     @ResponseBody
-    public RsData<WriterResponseBody> write(
+    public RsData<WriteResponseBody> write(
             @PathVariable("roomId") final long roomId,
             @RequestBody final WriterRequestBody requestBody
     ) {
         ChatMessage chatMessage = chatRoomService.write(roomId, requestBody.getWriterName(), requestBody.getContent());
+        
+        RsData<WriteResponseBody> writeRs = RsData.of("S-1", "%d번 메세지를 작성하였습니다.".formatted(chatMessage.getId()), new WriteResponseBody(chatMessage));
 
-        return RsData.of("S-1", "%d번 메세지를 작성하였습니다.".formatted(chatMessage.getId()), new WriterResponseBody(chatMessage.getId()));
+        messagingTemplate.convertAndSend("topic/chat/room/" + roomId + "/messageCreate", writeRs);
+
+        return RsData.of("S-1", "성공");
     }
 
-    @Getter
-    @AllArgsConstructor
-    public static class GetMessagesAfterResponseBody {
-        private List<ChatMessage> messages;
-    }
-
-    @GetMapping("/{roomId}/messagesAfter/{afterId}")
-    @ResponseBody
-    public RsData<GetMessagesAfterResponseBody> getMessagesAfter(
-            @PathVariable("roomId") final long roomId,
-            @PathVariable("afterId") final long afterId
-    ) {
-        List<ChatMessage> messages = chatMessageService.findByChatRoomAndIdAfter(roomId, afterId);
-        return RsData.of("S-1", "%d개의 메세지를 가져왔습니다.".formatted(messages.size()), new GetMessagesAfterResponseBody(messages));
-    }
+    
 }
