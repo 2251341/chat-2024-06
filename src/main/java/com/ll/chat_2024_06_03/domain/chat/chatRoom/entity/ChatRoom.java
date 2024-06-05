@@ -1,53 +1,39 @@
 package com.ll.chat_2024_06_03.domain.chat.chatRoom.entity;
 
-import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import com.ll.chat_2024_06_03.global.jpa.BaseEntity.BaseEntity;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Entity;
+import jakarta.persistence.OneToMany;
+import lombok.*;
+import lombok.experimental.SuperBuilder;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import static jakarta.persistence.GenerationType.IDENTITY;
 import static lombok.AccessLevel.PROTECTED;
 
 @Entity
-@Builder
-@EntityListeners(AuditingEntityListener.class) //엔티티 변경 사항
 @AllArgsConstructor(access = PROTECTED)
 @NoArgsConstructor(access = PROTECTED)
-public class ChatRoom {
-    @Id
-    @GeneratedValue(strategy = IDENTITY)
-    @Getter
-    private  Long id;
-
-    @CreatedDate
-    @Getter
-    private LocalDateTime createDate;
-
-    @LastModifiedDate
-    @Getter
-    private LocalDateTime modifyDate;
-
+@SuperBuilder
+@Getter
+@Setter
+@ToString(callSuper = true)
+public class ChatRoom extends BaseEntity {
     @Getter
     private String name;
 
     @OneToMany(mappedBy = "chatRoom", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     @Getter
+    @ToString.Exclude
     private List<ChatMessage> chatMessages = new ArrayList<>();
 
-    public ChatRoom(String name){
+    public ChatRoom(String name) {
         this.name = name;
     }
 
-    public void writeMessage(String writerName, String content) {
+    public ChatMessage writeMessage(String writerName, String content) {
         ChatMessage chatMessage = ChatMessage
                 .builder()
                 .chatRoom(this)
@@ -56,5 +42,6 @@ public class ChatRoom {
                 .build();
 
         chatMessages.add(chatMessage);
+        return chatMessage;
     }
 }
