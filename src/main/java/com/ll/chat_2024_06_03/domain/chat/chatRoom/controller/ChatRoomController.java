@@ -58,7 +58,7 @@ public class ChatRoomController {
 
     @Getter
     @Setter
-    public static class WriterRequestBody {
+    public static class WriteRequestBody {
         private String writerName;
         private String content;
     }
@@ -66,23 +66,21 @@ public class ChatRoomController {
     @Getter
     @AllArgsConstructor
     public static class WriteResponseBody {
-        private ChatMessage chatMessage;
+        private ChatMessage message;
     }
 
     @PostMapping("/{roomId}/write")
     @ResponseBody
-    public RsData<WriteResponseBody> write(
+    public RsData<?> write(
             @PathVariable("roomId") final long roomId,
-            @RequestBody final WriterRequestBody requestBody
+            @RequestBody final WriteRequestBody requestBody
     ) {
         ChatMessage chatMessage = chatRoomService.write(roomId, requestBody.getWriterName(), requestBody.getContent());
-        
-        RsData<WriteResponseBody> writeRs = RsData.of("S-1", "%d번 메세지를 작성하였습니다.".formatted(chatMessage.getId()), new WriteResponseBody(chatMessage));
 
-        messagingTemplate.convertAndSend("topic/chat/room/" + roomId + "/messageCreate", writeRs);
+        RsData<WriteResponseBody> writeRs = RsData.of("S-1", "%d번 메시지를 작성하였습니다.".formatted(chatMessage.getId()), new WriteResponseBody(chatMessage));
+
+        messagingTemplate.convertAndSend("/topic/chat/room/" + roomId + "/messageCreated", writeRs);
 
         return RsData.of("S-1", "성공");
     }
-
-    
 }
